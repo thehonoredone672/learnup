@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — VSB College | LearnUp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">V</div>
+    <div>
+      <div class="topbar-org">VSB College</div>
+      <div class="topbar-sub">Admin portal</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-user">
+      <div>
+        <div class="topbar-user-name">Ajay Kumar</div>
+        <div class="topbar-user-role">Program Coordinator</div>
+      </div>
+      <div class="avatar">AK</div>
+    </div>
+    <a class="btn btn-sm" href="index.html">
+      <svg class="icon" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      Switch portal
+    </a>
+  </div>
+</div>
+
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-label">Workspace</div>
+    <div class="sidebar-item active" data-tab="overview">
+      <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+      Overview
+    </div>
+    <div class="sidebar-item" data-tab="resources">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+      Resources
+    </div>
+    <div class="sidebar-item" data-tab="students">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Student activity
+    </div>
+    <div class="sidebar-item disabled">
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      Settings
+      <span class="soon">Soon</span>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- OVERVIEW TAB -->
+    <section id="tab-overview">
+      <div class="main-header">
+        <h1>Overview</h1>
+        <p>Knowledge base status for VSB College</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="card stat-card">
+          <div class="num" id="statDocs">5</div>
+          <div class="label">Documents indexed</div>
+        </div>
+        <div class="card stat-card">
+          <div class="num" id="statChunks">220</div>
+          <div class="label">Chunks embedded</div>
+        </div>
+        <div class="card stat-card">
+          <div class="num">184</div>
+          <div class="label">Student queries (7d)</div>
+        </div>
+        <div class="card stat-card">
+          <div class="num" style="color:var(--success)">Enforced</div>
+          <div class="label">Org-level isolation</div>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-head">
+          <h3>Student queries — last 7 days</h3>
+          <div class="chart-sub">184 total · 12% ↑ vs previous week</div>
+        </div>
+        <svg class="chart-svg" id="trendChart" viewBox="0 0 560 170" preserveAspectRatio="none"></svg>
+      </div>
+
+      <div class="card" style="padding:18px 20px;">
+        <h3 style="font-size:14px;margin-bottom:12px;">Recent activity</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;font-size:13px;">
+          <div style="display:flex;justify-content:space-between;">
+            <span><strong>B.Tech CSE Data Structures Syllabus.pdf</strong> finished indexing</span>
+            <span class="topbar-sub">28 Jul, 4:12 PM</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span>18 students asked questions about <strong>Operating Systems PYQ 2023</strong></span>
+            <span class="topbar-sub">27 Jul</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span><strong>DBMS Question Bank - Unit 1-5.docx</strong> uploaded by Priya Raghavan</span>
+            <span class="topbar-sub">21 Jul, 11:03 AM</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span><span class="badge badge-neutral" style="color:var(--danger);border-color:#F3C9CA;background:var(--danger-soft);">Blocked</span> 4 cross-institution queries were denied by isolation policy</span>
+            <span class="topbar-sub">This week</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESOURCES TAB -->
+    <section id="tab-resources" style="display:none;">
+      <div class="main-header">
+        <h1>Resources</h1>
+        <p>Upload and manage the documents your students' assistant can reference</p>
+      </div>
+
+      <div class="dropzone" id="dropzone" style="margin-bottom:20px;">
+        <svg class="icon dz-icon" viewBox="0 0 24 24"><path d="M4 14.9A7 7 0 0 1 15.7 8h1.8a4.5 4.5 0 0 1 .3 9H7a4 4 0 0 1-3-6.1"/><path d="M12 12v9"/><path d="m9 15 3-3 3 3"/></svg>
+        <strong>Drag files here, or click to upload</strong>
+        <div class="dz-sub">PDF, PPTX or DOCX — syllabus, notes, question banks, PYQs, course outcomes</div>
+        <button class="btn btn-primary btn-sm" id="uploadBtn" type="button">Choose files</button>
+        <input type="file" id="fileInput" multiple style="display:none">
+        <div class="dz-types">Files are processed into this organization's private index only</div>
+      </div>
+
+      <div class="toolbar">
+        <input class="input" id="docSearch" placeholder="Search documents by name…">
+        <span class="count" id="docCount"></span>
+      </div>
+
+      <div class="card" style="overflow:hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40%">Document</th>
+              <th>Type</th>
+              <th>Size</th>
+              <th>Chunks</th>
+              <th>Uploaded</th>
+              <th>Status</th>
+              <th style="width:40px;"></th>
+            </tr>
+          </thead>
+          <tbody id="docTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- STUDENTS TAB -->
+    <section id="tab-students" style="display:none;">
+      <div class="main-header">
+        <h1>Student activity</h1>
+        <p>Recent questions and how the isolation policy handled each one</p>
+      </div>
+
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="card stat-card">
+          <div class="num">184</div>
+          <div class="label">Queries answered from your KB</div>
+        </div>
+        <div class="card stat-card">
+          <div class="num" style="color:var(--danger);">4</div>
+          <div class="label">Cross-institution queries denied</div>
+        </div>
+        <div class="card stat-card">
+          <div class="num">62</div>
+          <div class="label">Unique students (7d)</div>
+        </div>
+      </div>
+
+      <div class="card" id="queryLog"></div>
+    </section>
+
+  </main>
+</div>
+
+<script src="data.js"></script>
+<script>
+const ORG_ID = "vsb";
+const org = ORGS[ORG_ID];
+
+function renderStats(){
+  document.getElementById('statDocs').textContent = org.docs.length;
+  document.getElementById('statChunks').textContent = org.docs.reduce((s,d)=>s+(d.chunks||0),0);
+}
+
+function docRowHtml(d, indexing){
+  const badge = indexing
+    ? `<span class="badge badge-neutral" data-status>Processing…</span>`
+    : `<span class="badge badge-success"><svg class="icon" style="width:11px;height:11px" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Indexed</span>`;
+  const del = indexing
+    ? `<td></td>`
+    : `<td><button class="icon-btn" title="Delete document" data-del="${encodeURIComponent(d.name)}"><svg class="icon" style="width:15px;height:15px" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></td>`;
+  return `
+    <td>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="doc-type ${d.ext}">${d.ext.toUpperCase()}</div>
+        <span>${d.name}</span>
+      </div>
+    </td>
+    <td class="topbar-sub" style="text-transform:uppercase;font-size:11.5px;">${d.ext}</td>
+    <td>${d.size}</td>
+    <td>${indexing ? '—' : d.chunks}</td>
+    <td>${d.uploaded}</td>
+    <td>${badge}</td>
+    ${del}
+  `;
+}
+
+let docFilter = '';
+function renderDocs(){
+  const body = document.getElementById('docTableBody');
+  body.innerHTML = '';
+  const q = docFilter.toLowerCase();
+  const filtered = org.docs.filter(d => d.name.toLowerCase().includes(q));
+  document.getElementById('docCount').textContent =
+    q ? `${filtered.length} of ${org.docs.length} shown` : `${org.docs.length} documents`;
+  if (!filtered.length){
+    body.innerHTML = `<tr class="empty-row"><td colspan="7">No documents match "${docFilter}"</td></tr>`;
+    return;
+  }
+  filtered.forEach(d => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = docRowHtml(d, false);
+    body.appendChild(tr);
+  });
+}
+
+document.getElementById('docSearch').addEventListener('input', e => {
+  docFilter = e.target.value;
+  renderDocs();
+});
+
+document.getElementById('docTableBody').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-del]');
+  if (!btn) return;
+  const name = decodeURIComponent(btn.getAttribute('data-del'));
+  if (!confirm(`Delete "${name}" from the knowledge base? Students will no longer be able to reference it.`)) return;
+  const i = org.docs.findIndex(d => d.name === name);
+  if (i > -1) org.docs.splice(i, 1);
+  renderDocs();
+  renderStats();
+});
+
+/* ----- Query trends chart ----- */
+function renderChart(){
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const values = [18, 24, 31, 27, 42, 22, 20];
+  const svg = document.getElementById('trendChart');
+  const W = 560, H = 170, pad = 26, gap = 14;
+  const max = Math.max(...values);
+  const bw = (W - pad*2 - gap*(values.length-1)) / values.length;
+  const chartH = H - 46;
+  let out = `<line class="axis" x1="${pad}" y1="${chartH+8}" x2="${W-pad}" y2="${chartH+8}"/>`;
+  values.forEach((v, i) => {
+    const x = pad + i*(bw+gap);
+    const h = Math.round((v/max) * (chartH-10));
+    const y = (chartH+8) - h;
+    out += `<rect class="bar" x="${x}" y="${y}" width="${bw}" height="${h}" rx="3"/>`;
+    out += `<text class="bar-value" x="${x+bw/2}" y="${y-6}">${v}</text>`;
+    out += `<text class="bar-label" x="${x+bw/2}" y="${H-8}">${days[i]}</text>`;
+  });
+  svg.innerHTML = out;
+}
+
+/* ----- Student activity log ----- */
+const QUERY_LOG = [
+  { who: 'Dharnis M',      init: 'DM', q: 'What topics are in the Data Structures syllabus?',   status: 'answered', when: '2 min ago' },
+  { who: 'Priya Raghavan', init: 'PR', q: 'Which questions repeated in the 2023 OS paper?',     status: 'answered', when: '14 min ago' },
+  { who: 'Rohit Verma',    init: 'RV', q: 'Summarize current affairs for January 2026',         status: 'denied',   when: '38 min ago' },
+  { who: 'Sneha Iyer',     init: 'SI', q: 'Summarize the Machine Learning course outcomes',      status: 'answered', when: '1 hr ago' },
+  { who: 'Karthik R',      init: 'KR', q: 'Explain Indian Polity fundamental rights',            status: 'denied',   when: '2 hr ago' },
+  { who: 'Ananya G',       init: 'AG', q: 'What is covered in the DBMS question bank?',          status: 'answered', when: '3 hr ago' },
+  { who: 'Vikram S',       init: 'VS', q: 'Unit 3 scheduling algorithms — Gantt chart examples', status: 'answered', when: 'Yesterday' },
+  { who: 'Meera J',        init: 'MJ', q: 'Any recurring themes in Economics PYQs?',             status: 'denied',   when: 'Yesterday' },
+];
+
+function renderQueryLog(){
+  const el = document.getElementById('queryLog');
+  el.innerHTML = QUERY_LOG.map(row => {
+    const badge = row.status === 'answered'
+      ? `<span class="badge badge-success">Answered from KB</span>`
+      : `<span class="badge" style="background:var(--danger-soft);color:var(--danger);">Blocked · cross-institution</span>`;
+    const reason = row.status === 'answered'
+      ? 'Retrieved from indexed documents'
+      : 'Topic belongs to another organization';
+    return `
+      <div class="log-item">
+        <div class="log-avatar">${row.init}</div>
+        <div>
+          <div class="log-q">${row.q}</div>
+          <div class="log-meta">${row.who} · ${reason}</div>
+        </div>
+        <div style="text-align:right;">
+          ${badge}
+          <div class="log-time" style="margin-top:4px;">${row.when}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* Tabs */
+const TABS = ['overview','resources','students'];
+document.querySelectorAll('.sidebar-item[data-tab]').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.sidebar-item[data-tab]').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    const tab = item.getAttribute('data-tab');
+    TABS.forEach(t => {
+      document.getElementById('tab-'+t).style.display = (t === tab) ? '' : 'none';
+    });
+  });
+});
+
+/* Upload simulation */
+function guessExt(filename){
+  const m = filename.toLowerCase().match(/\.(pdf|pptx|docx|ppt|doc)$/);
+  if (!m) return 'pdf';
+  const e = m[1];
+  if (e === 'ppt') return 'pptx';
+  if (e === 'doc') return 'docx';
+  return e;
+}
+
+function addDoc(filename){
+  const ext = guessExt(filename);
+  const today = 'Just now';
+  const doc = { name: filename, ext, size: '—', chunks: 0, uploaded: today };
+  const body = document.getElementById('docTableBody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = docRowHtml(doc, true);
+  body.prepend(tr);
+
+  const stages = ['Uploading…','Chunking…','Embedding…','Indexed'];
+  let i = 0;
+  const statusEl = tr.querySelector('[data-status]');
+  const timer = setInterval(() => {
+    if (i < stages.length - 1){
+      statusEl.textContent = stages[i];
+      i++;
+    } else {
+      clearInterval(timer);
+      const size = (0.3 + Math.random()*3.5).toFixed(1) + ' MB';
+      const chunks = 15 + Math.floor(Math.random()*70);
+      doc.size = size; doc.chunks = chunks; doc.uploaded = 'Just now';
+      org.docs.unshift(doc);
+      tr.innerHTML = docRowHtml(doc, false);
+      renderStats();
+    }
+  }, 550);
+}
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+document.getElementById('uploadBtn').addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => {
+  Array.from(e.target.files).forEach(f => addDoc(f.name));
+  fileInput.value = '';
+});
+['dragover'].forEach(evt => dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add('drag'); }));
+['dragleave','drop'].forEach(evt => dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.remove('drag'); }));
+dropzone.addEventListener('drop', e => {
+  const files = Array.from(e.dataTransfer.files);
+  if (files.length) files.forEach(f => addDoc(f.name));
+});
+
+renderStats();
+renderDocs();
+renderChart();
+renderQueryLog();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student | LearnUp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ORG SELECT SCREEN -->
+<div class="org-select-page" id="orgSelectScreen">
+  <div class="org-select-box">
+    <h2>Select your institution</h2>
+    <div class="sub">LearnUp keeps every institution's materials in a separate, private knowledge base.</div>
+    <input class="input" id="orgSearch" placeholder="Search for your college or institute…">
+    <div class="org-list" id="orgList"></div>
+    <div class="portal-footnote" style="margin-top:22px;"><a href="index.html">← Back</a></div>
+  </div>
+</div>
+
+<!-- CHAT SCREEN -->
+<div id="chatScreen" style="display:none;">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo" id="chatLogo">V</div>
+      <div>
+        <div class="topbar-org" id="chatOrgName">VSB College</div>
+        <div class="topbar-sub">Student portal</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-user">
+        <div>
+          <div class="topbar-user-name">Dharnis M</div>
+          <div class="topbar-user-role">B.Tech CSE, 3rd Year</div>
+        </div>
+        <div class="avatar">DM</div>
+      </div>
+      <button class="btn btn-sm" id="clearChatBtn" type="button">
+        <svg class="icon" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Clear
+      </button>
+      <a class="btn btn-sm" href="#" id="changeOrgLink">
+        <svg class="icon" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+        Switch institution
+      </a>
+    </div>
+  </div>
+
+  <div class="chat-wrap">
+    <div class="chat-scroll" id="chatScroll"></div>
+    <div class="chat-suggestions" id="chatSuggestions"></div>
+    <div class="chat-input-bar">
+      <input class="input" id="chatInput" placeholder="Ask about your syllabus, PYQs, notes…">
+      <button class="btn btn-primary" id="sendBtn">
+        <svg class="icon" style="stroke:#fff;width:15px;height:15px" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        Send
+      </button>
+    </div>
+    <div class="chat-scope" id="chatScope"></div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+let currentOrgId = null;
+
+function renderOrgList(filter){
+  const list = document.getElementById('orgList');
+  list.innerHTML = '';
+  const q = (filter || '').toLowerCase();
+  Object.values(ORGS).filter(o => o.name.toLowerCase().includes(q)).forEach(org => {
+    const row = document.createElement('div');
+    row.className = 'org-row';
+    row.innerHTML = `
+      <div class="icon-wrap">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>
+      </div>
+      <div>
+        <div class="org-row-title">${org.name}</div>
+        <div class="org-row-sub">${org.type}</div>
+      </div>
+    `;
+    row.addEventListener('click', () => enterChat(org.id));
+    list.appendChild(row);
+  });
+  if (!list.children.length){
+    list.innerHTML = `<div style="font-size:12.5px;color:var(--text-faint);padding:8px 2px;">No institution matches "${filter}"</div>`;
+  }
+}
+
+document.getElementById('orgSearch').addEventListener('input', e => renderOrgList(e.target.value));
+
+function enterChat(orgId){
+  currentOrgId = orgId;
+  const org = ORGS[orgId];
+  document.getElementById('orgSelectScreen').style.display = 'none';
+  document.getElementById('chatScreen').style.display = 'block';
+  document.getElementById('chatLogo').textContent = org.short.charAt(0);
+  document.getElementById('chatOrgName').textContent = org.name;
+  document.getElementById('chatScope').textContent =
+    `Answers are grounded only in ${org.name}'s uploaded documents (${org.docs.length} indexed).`;
+  renderSuggestions();
+  resetChat();
+}
+
+function renderSuggestions(){
+  const org = ORGS[currentOrgId];
+  const wrap = document.getElementById('chatSuggestions');
+  wrap.innerHTML = '';
+  org.suggested.forEach(q => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.textContent = q;
+    chip.addEventListener('click', () => sendMessage(q));
+    wrap.appendChild(chip);
+  });
+}
+
+function resetChat(){
+  const org = ORGS[currentOrgId];
+  const scroll = document.getElementById('chatScroll');
+  scroll.innerHTML = '';
+  appendAssistant(`Hi Dharnis — I can answer questions using **${org.name}**'s uploaded materials. Try one of the suggestions below, or type your own question.`, null, false);
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function renderMarkdown(str){
+  return escapeHtml(str)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\n/g, '<br>');
+}
+
+function nowTime(){
+  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function appendUser(text){
+  const scroll = document.getElementById('chatScroll');
+  const el = document.createElement('div');
+  el.className = 'chat-message user';
+  el.innerHTML = `<div class="avatar" style="background:var(--text);color:#fff;">DM</div>
+    <div><div class="bubble">${escapeHtml(text)}</div><div class="msg-meta" style="text-align:right;">${nowTime()}</div></div>`;
+  scroll.appendChild(el);
+  scroll.scrollTop = scroll.scrollHeight;
+}
+
+function appendAssistant(text, sources, denied){
+  const scroll = document.getElementById('chatScroll');
+  const org = ORGS[currentOrgId];
+  const el = document.createElement('div');
+  el.className = 'chat-message assistant' + (denied ? ' denied' : '');
+  let srcHtml = '';
+  if (sources && sources.length){
+    srcHtml = `<div class="msg-sources">` + sources.map(s => `
+      <span class="src-chip">
+        <svg class="icon" style="width:11px;height:11px" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+        ${s.d} · ${s.p}
+      </span>`).join('') + `</div>`;
+  }
+  el.innerHTML = `<div class="avatar">${org.short.slice(0,2)}</div>
+    <div><div class="bubble">${renderMarkdown(text)}</div>${srcHtml}<div class="msg-meta">${nowTime()}</div></div>`;
+  scroll.appendChild(el);
+  scroll.scrollTop = scroll.scrollHeight;
+}
+
+function showTyping(){
+  const scroll = document.getElementById('chatScroll');
+  const org = ORGS[currentOrgId];
+  const el = document.createElement('div');
+  el.className = 'chat-message assistant';
+  el.id = 'typingRow';
+  el.innerHTML = `<div class="avatar">${org.short.slice(0,2)}</div>
+    <div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  scroll.appendChild(el);
+  scroll.scrollTop = scroll.scrollHeight;
+}
+function hideTyping(){
+  const el = document.getElementById('typingRow');
+  if (el) el.remove();
+}
+
+function sendMessage(text){
+  const value = (text !== undefined ? text : document.getElementById('chatInput').value).trim();
+  if (!value) return;
+  appendUser(value);
+  document.getElementById('chatInput').value = '';
+  showTyping();
+  setTimeout(() => {
+    hideTyping();
+    const result = matchKB(currentOrgId, value);
+    appendAssistant(result.text, result.sources, result.denied);
+  }, 700 + Math.random()*400);
+}
+
+document.getElementById('sendBtn').addEventListener('click', () => sendMessage());
+document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+document.getElementById('clearChatBtn').addEventListener('click', () => {
+  if (currentOrgId) resetChat();
+});
+document.getElementById('changeOrgLink').addEventListener('click', e => {
+  e.preventDefault();
+  document.getElementById('chatScreen').style.display = 'none';
+  document.getElementById('orgSelectScreen').style.display = 'flex';
+  document.getElementById('orgSearch').value = '';
+  renderOrgList('');
+});
+
+renderOrgList('');
+</script>
+
+</body>
+</html>
