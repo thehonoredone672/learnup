@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create account | LearnUp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-box">
+    <div class="auth-brand">
+      <div class="mark">L</div>
+      <div class="title">LearnUp</div>
+      <div class="sub">Digital learning platform</div>
+    </div>
+
+    <div class="card auth-card">
+      <h2>Create a student account</h2>
+      <div class="auth-error" id="err"></div>
+      <form id="regForm">
+        <div class="auth-row">
+          <label for="name">Full name</label>
+          <input class="input" id="name" name="name" required autocomplete="name" placeholder="e.g. Aditya Menon">
+        </div>
+        <div class="auth-row">
+          <label for="email">Email</label>
+          <input class="input" id="email" name="email" type="email" required autocomplete="email" placeholder="you@college.edu">
+        </div>
+        <div class="auth-row">
+          <label for="password">Password</label>
+          <input class="input" id="password" name="password" type="password" required minlength="6" autocomplete="new-password" placeholder="At least 6 characters">
+        </div>
+        <button class="btn btn-primary btn-block" type="submit" id="submitBtn">Create account</button>
+      </form>
+      <div class="auth-swap">Already have one? <a href="/login.html">Log in instead</a></div>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+const err = document.getElementById('err');
+const btn = document.getElementById('submitBtn');
+
+document.getElementById('regForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  err.classList.remove('show'); err.textContent = '';
+  btn.disabled = true; btn.textContent = 'Creating…';
+  try {
+    const { user, token } = await LU.api('/api/auth/register', {
+      method: 'POST',
+      body: {
+        name:     document.getElementById('name').value.trim(),
+        email:    document.getElementById('email').value.trim(),
+        password: document.getElementById('password').value,
+      },
+    });
+    LU.token = token; LU.user = user;
+    location.href = '/dashboard.html';
+  } catch (ex) {
+    err.textContent = ex.message || 'Registration failed';
+    err.classList.add('show');
+    btn.disabled = false; btn.textContent = 'Create account';
+  }
+});
+</script>
+</body>
+</html>

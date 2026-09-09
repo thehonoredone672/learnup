@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Topic | LearnUp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<div class="topbar" id="topbar"></div>
+
+<div class="main">
+  <div class="reader">
+    <div class="breadcrumb"><a href="/dashboard.html">Courses</a> / <a id="courseLink" href="#"></a> / <span id="crumb"></span></div>
+    <h2 id="title">Loading…</h2>
+    <div class="content" id="content"></div>
+
+    <div id="resources" style="margin-top:22px;"></div>
+
+    <div class="topic-actions">
+      <button class="btn" id="completeBtn" type="button" style="display:none;">Mark as complete</button>
+      <button class="btn btn-primary" id="quizBtn" type="button" style="display:none;">
+        <svg class="icon" style="stroke:#fff;width:14px;height:14px" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+        Start quiz
+      </button>
+      <a class="btn" id="backLink" href="#">Back to course</a>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+if (!LU.requireAuth()) { /* redirected */ } else init();
+
+async function init(){
+  LU.renderTopbar(document.getElementById('topbar'), { subtitle: 'Topic' });
+  const id = LU.qs('id');
+  if (!id){ location.href = '/dashboard.html'; return; }
+  const { topic, resources, quiz, completed } = await LU.api('/api/topics/' + id);
+
+  document.title = topic.title + ' | LearnUp';
+  document.getElementById('crumb').textContent = topic.title;
+  document.getElementById('courseLink').textContent = topic.course_title;
+  document.getElementById('courseLink').href  = '/course.html?id=' + topic.course_id;
+  document.getElementById('backLink').href    = '/course.html?id=' + topic.course_id;
+  document.getElementById('title').textContent = topic.title;
+  document.getElementById('content').innerHTML = LU.md(topic.content);
+
+  if (resources.length){
+    document.getElementById('resources').innerHTML = `
+      <h3 style="font-size:13px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Resources</h3>
+      <div class="resource-list">${resources.map(r => `
+        <div class="resource-item">
+          <span class="kind">${r.kind}</span>
+          <a href="${LU.esc(r.url)}" target="_blank" rel="noopener">${LU.esc(r.title)}</a>
+        </div>`).join('')}</div>`;
+  }
+
+  const completeBtn = document.getElementById('completeBtn');
+  const quizBtn     = document.getElementById('quizBtn');
+
+  if (completed){
+    completeBtn.textContent = '✓ Completed';
+    completeBtn.disabled = true; completeBtn.style.display = '';
+  } else {
+    completeBtn.style.display = '';
+    completeBtn.addEventListener('click', async () => {
+      completeBtn.disabled = true; completeBtn.textContent = 'Saving…';
+      try {
+        await LU.api('/api/topics/' + id + '/complete', { method: 'POST' });
+        completeBtn.textContent = '✓ Completed';
+      } catch (e){ completeBtn.disabled = false; completeBtn.textContent = 'Mark as complete'; alert(e.message); }
+    });
+  }
+
+  if (quiz){
+    quizBtn.style.display = '';
+    quizBtn.addEventListener('click', () => location.href = '/quiz.html?id=' + quiz.id);
+  }
+}
+</script>
+</body>
+</html>

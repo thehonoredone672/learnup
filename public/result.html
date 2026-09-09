@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Result | LearnUp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<div class="topbar" id="topbar"></div>
+
+<div class="main">
+  <div class="quiz">
+    <div class="card result-hero">
+      <div class="score" id="score">—</div>
+      <div class="sub" id="scoreSub"></div>
+      <div class="status" id="statusBadge"></div>
+    </div>
+    <h3 style="font-size:13.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Answer review</h3>
+    <div id="feedback"></div>
+
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <a class="btn btn-primary" href="/progress.html">See my progress</a>
+      <a class="btn" href="/dashboard.html">Back to courses</a>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+if (!LU.requireAuth()) { /* redirected */ } else init();
+
+async function init(){
+  LU.renderTopbar(document.getElementById('topbar'), { subtitle: 'Quiz result' });
+  const id = LU.qs('id');
+  if (!id){ location.href = '/dashboard.html'; return; }
+
+  let data = null;
+  const cached = sessionStorage.getItem('lu_last_result');
+  if (cached){
+    try { const c = JSON.parse(cached); if (String(c.attempt_id) === String(id)) data = c; } catch {}
+  }
+  if (!data){
+    const server = await LU.api('/api/attempts/' + id);
+    data = { attempt_id: id, score: server.attempt.score, total: server.attempt.total,
+             percent: server.percent, passed: server.percent >= 60, pass_score: 60,
+             feedback: server.feedback };
+  }
+  sessionStorage.removeItem('lu_last_result');
+
+  const pct = data.percent;
+  const scoreEl = document.getElementById('score');
+  scoreEl.textContent = pct + '%';
+  scoreEl.classList.add(data.passed ? 'pass' : 'fail');
+  document.getElementById('scoreSub').textContent =
+    `${data.score} of ${data.total} correct · Passing mark ${data.pass_score || 60}%`;
+  document.getElementById('statusBadge').innerHTML = data.passed
+    ? `<span class="badge badge-success">Passed — topic marked complete</span>`
+    : `<span class="badge" style="background:var(--danger-soft);color:var(--danger);">Try again to pass this topic</span>`;
+
+  document.getElementById('feedback').innerHTML = data.feedback.map((f, i) => {
+    const opts = f.options.map((o, oi) => {
+      let cls = '', marker = '';
+      if (oi === f.correct_index){ cls = 'correct';  marker = 'Correct'; }
+      if (oi === f.selected_index && f.selected_index !== f.correct_index){ cls = 'wrong'; marker = 'Your answer'; }
+      if (oi === f.selected_index && f.is_correct){ marker = 'Your answer ✓'; }
+      return `<div class="option ${cls}">
+        <div class="radio"${oi === f.selected_index ? ' style="border-color:currentColor;"' : ''}></div>
+        <div>${LU.esc(o)}</div>
+        ${marker ? `<div class="marker">${marker}</div>` : ''}
+      </div>`;
+    }).join('');
+    return `<div class="card question-card">
+      <div class="qtext"><strong style="color:var(--text-muted);">Q${i+1}.</strong> ${LU.esc(f.text)}</div>
+      ${opts}
+      ${f.explanation ? `<div class="q-explain"><strong>Why:</strong> ${LU.esc(f.explanation)}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

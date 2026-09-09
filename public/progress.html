@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My progress | LearnUp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<div class="topbar" id="topbar"></div>
+
+<div class="main">
+  <div class="main-header">
+    <h1>My progress</h1>
+    <p>Track topics completed, quiz history and performance trends</p>
+  </div>
+
+  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+    <div class="card stat-card"><div class="num" id="stTopics">—</div><div class="label">Topics completed</div></div>
+    <div class="card stat-card"><div class="num" id="stAttempts">—</div><div class="label">Quiz attempts</div></div>
+    <div class="card stat-card"><div class="num" id="stAvg">—</div><div class="label">Average score</div></div>
+    <div class="card stat-card"><div class="num" id="stStreak">—</div><div class="label">Days active (7d)</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px;">
+    <div class="card chart-card" style="margin:0;">
+      <div class="chart-head">
+        <h3>Quiz score trend</h3>
+        <div class="chart-sub">Last 7 days · % correct</div>
+      </div>
+      <svg class="chart-svg" id="trendChart" viewBox="0 0 560 170" preserveAspectRatio="none"></svg>
+    </div>
+
+    <div class="card" style="padding:18px 20px;">
+      <h3 style="font-size:14px;margin-bottom:14px;">Progress by course</h3>
+      <div id="perCourse"></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="card" style="padding:0;">
+      <div style="padding:14px 18px 8px;"><h3 style="font-size:14px;">Recent quiz attempts</h3></div>
+      <div id="attempts"></div>
+    </div>
+    <div class="card" style="padding:0;">
+      <div style="padding:14px 18px 8px;"><h3 style="font-size:14px;">Activity feed</h3></div>
+      <div id="activity"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+if (!LU.requireAuth()) { /* redirected */ } else init();
+
+async function init(){
+  LU.renderTopbar(document.getElementById('topbar'), { subtitle: 'Progress tracking' });
+  const p = await LU.api('/api/progress/me');
+
+  document.getElementById('stTopics').textContent   = `${p.totals.completed_topics} / ${p.totals.total_topics}`;
+  document.getElementById('stAttempts').textContent = p.totals.attempts_count;
+  document.getElementById('stAvg').textContent      = p.totals.attempts_count ? p.avg_percent + '%' : '—';
+  document.getElementById('stStreak').textContent   = p.trend.length;
+
+  renderTrend(p.trend);
+  renderCourses(p.per_course);
+  renderAttempts(p.recent_attempts);
+  renderActivity(p.activity);
+}
+
+function renderTrend(trend){
+  const svg = document.getElementById('trendChart');
+  const W = 560, H = 170, pad = 30;
+  const chartH = H - 42;
+  const days = 7;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const buckets = [];
+  for (let i = days - 1; i >= 0; i--){
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    const iso = d.toISOString().slice(0,10);
+    const hit = trend.find(t => t.day === iso);
+    buckets.push({
+      label: d.toLocaleDateString(undefined, { weekday: 'short' }),
+      pct:   hit ? Math.round(hit.avg_ratio * 100) : null,
+    });
+  }
+  const bw = (W - pad*2 - 12*(buckets.length-1)) / buckets.length;
+  let out = `<line class="axis" x1="${pad}" y1="${chartH+8}" x2="${W-pad}" y2="${chartH+8}"/>`;
+  buckets.forEach((b, i) => {
+    const x = pad + i * (bw + 12);
+    if (b.pct == null){
+      out += `<text class="bar-label" x="${x+bw/2}" y="${H-8}">${b.label}</text>`;
+      out += `<rect class="bar" x="${x}" y="${chartH+4}" width="${bw}" height="3" fill="#E4E7EC"/>`;
+      return;
+    }
+    const h = Math.max(4, Math.round((b.pct/100) * (chartH-10)));
+    const y = (chartH+8) - h;
+    out += `<rect class="bar" x="${x}" y="${y}" width="${bw}" height="${h}" rx="3"/>`;
+    out += `<text class="bar-value" x="${x+bw/2}" y="${y-6}">${b.pct}%</text>`;
+    out += `<text class="bar-label" x="${x+bw/2}" y="${H-8}">${b.label}</text>`;
+  });
+  svg.innerHTML = out;
+}
+
+function renderCourses(list){
+  document.getElementById('perCourse').innerHTML = list.length
+    ? list.map(c => {
+        const pct = c.topics_total ? Math.round((c.topics_completed / c.topics_total) * 100) : 0;
+        return `<div class="course-progress-row">
+          <div>
+            <div class="t">${LU.esc(c.title)}</div>
+            <div class="progress-bar-outer" style="margin-top:6px;"><div class="progress-bar-inner" style="width:${pct}%"></div></div>
+          </div>
+          <div class="n">${c.topics_completed} / ${c.topics_total}</div>
+          <div style="text-align:right;font-weight:600;font-size:13px;">${pct}%</div>
+        </div>`;
+      }).join('')
+    : `<div style="padding:14px;color:var(--text-faint);font-size:13px;">No course data yet.</div>`;
+}
+
+function renderAttempts(list){
+  document.getElementById('attempts').innerHTML = list.length
+    ? list.map(a => {
+        const pct = a.total ? Math.round((a.score / a.total) * 100) : 0;
+        const cls = pct >= 60 ? 'pass' : 'fail';
+        return `<a class="attempt-item" href="/result.html?id=${a.id}">
+          <div>
+            <div class="q">${LU.esc(a.quiz_title)}</div>
+            <div class="m">${LU.esc(a.topic_title)} · ${new Date(a.submitted_at + 'Z').toLocaleString([], { dateStyle:'medium', timeStyle:'short' })}</div>
+          </div>
+          <div class="pct ${cls}">${pct}%</div>
+          <svg class="icon chev" viewBox="0 0 24 24" style="color:var(--text-faint);"><path d="m9 18 6-6-6-6"/></svg>
+        </a>`;
+      }).join('')
+    : `<div style="padding:14px 18px 18px;color:var(--text-faint);font-size:13px;">No quiz attempts yet — pick a topic and try one.</div>`;
+}
+
+function renderActivity(list){
+  const icon = k => k === 'quiz_submitted' ? '📝' : k === 'topic_completed' ? '✅' : k === 'login' ? '🔑' : '•';
+  document.getElementById('activity').innerHTML = list.length
+    ? list.map(a => `
+        <div style="display:flex;gap:10px;align-items:flex-start;padding:9px 18px;border-bottom:1px solid var(--border);font-size:12.5px;">
+          <div style="width:22px;flex-shrink:0;">${icon(a.kind)}</div>
+          <div style="flex:1;">
+            <div>${LU.esc(a.detail || a.kind.replace('_',' '))}</div>
+            <div style="font-size:11px;color:var(--text-faint);">${new Date(a.created_at + 'Z').toLocaleString([], { dateStyle:'medium', timeStyle:'short' })}</div>
+          </div>
+        </div>`).join('')
+    : `<div style="padding:14px 18px 18px;color:var(--text-faint);font-size:13px;">Nothing here yet.</div>`;
+}
+</script>
+</body>
+</html>

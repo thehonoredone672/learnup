@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz | LearnUp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<div class="topbar" id="topbar"></div>
+
+<div class="main">
+  <div class="quiz">
+    <div class="breadcrumb" style="font-size:12px;color:var(--text-faint);margin-bottom:6px;">
+      <a href="/dashboard.html" style="color:var(--text-muted);">Courses</a> / <a id="topicLink" href="#" style="color:var(--text-muted);"></a> / Quiz
+    </div>
+    <div class="qhead">
+      <h2 id="title">Loading…</h2>
+      <div class="progress-txt" id="progressTxt"></div>
+    </div>
+    <div class="progress-track" style="width:100%;"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div id="questions"></div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+      <a class="btn" id="cancelLink" href="/dashboard.html">Cancel</a>
+      <button class="btn btn-primary" id="submitBtn" type="button" disabled>Submit quiz</button>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+if (!LU.requireAuth()) { /* redirected */ } else init();
+
+const answers = {};
+let quizData = null;
+let attemptId = null;
+
+async function init(){
+  LU.renderTopbar(document.getElementById('topbar'), { subtitle: 'Quiz' });
+  const quizId = LU.qs('id');
+  if (!quizId){ location.href = '/dashboard.html'; return; }
+
+  try {
+    quizData = await LU.api('/api/quizzes/' + quizId);
+    const started = await LU.api('/api/quizzes/' + quizId + '/attempts', { method: 'POST' });
+    attemptId = started.attempt_id;
+  } catch (e){
+    document.getElementById('title').textContent = 'Could not start quiz';
+    document.getElementById('questions').innerHTML = `<div class="card" style="padding:20px;color:var(--danger)">${LU.esc(e.message)}</div>`;
+    return;
+  }
+
+  document.title = quizData.quiz.title + ' | LearnUp';
+  document.getElementById('title').textContent = quizData.quiz.title;
+  document.getElementById('topicLink').textContent = quizData.quiz.topic_title;
+  document.getElementById('topicLink').href = '/topic.html?id=' + quizData.quiz.topic_id;
+  document.getElementById('cancelLink').href = '/topic.html?id=' + quizData.quiz.topic_id;
+
+  const wrap = document.getElementById('questions');
+  wrap.innerHTML = quizData.questions.map((q, qi) => `
+    <div class="card question-card">
+      <div class="qtext"><strong style="color:var(--text-muted);">Q${qi+1}.</strong> ${LU.esc(q.text)}</div>
+      ${q.options.map((opt, oi) => `
+        <div class="option" data-q="${q.id}" data-o="${oi}">
+          <div class="radio"></div>
+          <div>${LU.esc(opt)}</div>
+        </div>`).join('')}
+    </div>
+  `).join('');
+
+  wrap.addEventListener('click', e => {
+    const opt = e.target.closest('.option');
+    if (!opt) return;
+    const qid = Number(opt.dataset.q), oi = Number(opt.dataset.o);
+    answers[qid] = oi;
+    document.querySelectorAll(`.option[data-q="${qid}"]`).forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    updateProgress();
+  });
+
+  updateProgress();
+}
+
+function updateProgress(){
+  const total = quizData.questions.length;
+  const done  = Object.keys(answers).length;
+  document.getElementById('progressTxt').textContent = `${done} of ${total} answered`;
+  document.getElementById('progressFill').style.width = ((done / total) * 100) + '%';
+  document.getElementById('submitBtn').disabled = (done < total);
+}
+
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  try {
+    const result = await LU.api('/api/attempts/' + attemptId + '/submit', {
+      method: 'POST', body: { answers },
+    });
+    sessionStorage.setItem('lu_last_result', JSON.stringify(result));
+    location.href = '/result.html?id=' + attemptId;
+  } catch (e){
+    btn.disabled = false; btn.textContent = 'Submit quiz';
+    alert(e.message);
+  }
+});
+</script>
+</body>
+</html>

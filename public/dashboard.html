@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard | LearnUp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<div class="topbar" id="topbar"></div>
+
+<div class="main">
+  <div class="main-header">
+    <h1 id="hello">Welcome</h1>
+    <p>Pick a course to keep learning</p>
+  </div>
+
+  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);" id="stats">
+    <div class="card stat-card"><div class="num" id="stCourses">—</div><div class="label">Courses available</div></div>
+    <div class="card stat-card"><div class="num" id="stTopics">—</div><div class="label">Topics completed</div></div>
+    <div class="card stat-card"><div class="num" id="stAvg">—</div><div class="label">Quiz average</div></div>
+  </div>
+
+  <div class="toolbar">
+    <input class="input" id="search" placeholder="Search courses…">
+    <span class="count" id="count"></span>
+  </div>
+
+  <div class="grid-cards" id="courses"></div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+if (!LU.requireAuth()) { /* redirected */ } else init();
+
+async function init(){
+  LU.renderTopbar(document.getElementById('topbar'), { subtitle: 'Student dashboard' });
+  document.getElementById('hello').textContent = `Welcome, ${LU.user.name.split(' ')[0]}`;
+
+  const [{ courses }, progress] = await Promise.all([
+    LU.api('/api/courses'),
+    LU.api('/api/progress/me').catch(() => null),
+  ]);
+
+  document.getElementById('stCourses').textContent = courses.length;
+  if (progress){
+    document.getElementById('stTopics').textContent = progress.totals.completed_topics + ' / ' + progress.totals.total_topics;
+    document.getElementById('stAvg').textContent = (progress.totals.attempts_count ? progress.avg_percent + '%' : '—');
+  }
+
+  let filter = '';
+  const wrap = document.getElementById('courses');
+  const count = document.getElementById('count');
+  function render(){
+    const q = filter.toLowerCase();
+    const list = courses.filter(c => c.title.toLowerCase().includes(q) || c.description.toLowerCase().includes(q));
+    count.textContent = filter ? `${list.length} of ${courses.length} shown` : `${courses.length} courses`;
+    if (!list.length){
+      wrap.innerHTML = `<div class="card" style="padding:26px;text-align:center;color:var(--text-faint);">No course matches "${LU.esc(filter)}"</div>`;
+      return;
+    }
+    wrap.innerHTML = list.map(c => `
+      <a class="card course-card" href="/course.html?id=${c.id}">
+        <h3>${LU.esc(c.title)}</h3>
+        <div class="desc">${LU.esc(c.description)}</div>
+        <div class="meta">
+          <span>${LU.esc(c.instructor || 'Instructor')}</span>
+          <span>${c.topic_count} topic${c.topic_count === 1 ? '' : 's'}</span>
+        </div>
+      </a>
+    `).join('');
+  }
+  document.getElementById('search').addEventListener('input', e => { filter = e.target.value; render(); });
+  render();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "learnup",
+  "version": "1.0.0",
+  "description": "LearnUp — a digital learning platform. B.Tech CSE mini project.",
+  "private": true,
+  "type": "commonjs",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node --no-warnings server/index.js",
+    "dev": "node --watch --no-warnings server/index.js",
+    "seed": "node --no-warnings server/seed.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
